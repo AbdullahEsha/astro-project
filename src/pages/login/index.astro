@@ -1,0 +1,57 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Login">
+  <div class="h-screen flex items-center justify-center">
+    <form class="w-96 space-y-4" id="loginForm">
+      <h1 class="text-4xl font-bold">Login</h1>
+      <div>
+        <label for="email" class="block">Email</label>
+        <input type="email" id="email" name="email" class="w-full border border-gray-300 rounded px-2" />
+      </div>
+      <div>
+        <label for="password" class="block">Password</label>
+        <input type="password" id="password" name="password" class="w-full border border-gray-300 rounded px-2" />
+      </div>
+      <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded">Login</button>
+      <hr class="border-gray-300" />
+      <div class="flex justify-between">
+          <a href="/register" class="text-blue-500">Register</a>
+          <a href="/forgot-password" class="text-blue-500">Forgot Password</a>
+      </div>
+    </form>
+  </div>
+    <script>
+        import { navigate } from "astro:transitions/client";
+
+        const formElement = document.getElementById('loginForm');
+        if (formElement) {
+            formElement.addEventListener('submit', async (event) => {
+                event.preventDefault(); // Prevent the default form submission
+
+                const formData = new FormData(event.target as HTMLFormElement);
+                const data = Object.fromEntries(formData.entries());
+
+                fetch('http://localhost:5000/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if(data.message.includes('successful')) {
+                            localStorage.setItem('token', data.accessToken);
+                            localStorage.setItem('user', JSON.stringify(data.user));
+                            navigate('/admin');
+                        }   
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+            });
+        }
+    </script>
+</Layout>
